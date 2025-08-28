@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Undian Fun Walk HUT Ke-80 MPR RI</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-red: #dc3545;
+            --primary-red-dark: #c82333;
+            --primary-red-light: #f8d7da;
+            --white: #ffffff;
+            --cream: #fef9f3;
+            --gold: #ffd700;
+            --gold-dark: #ffb300;
+            --text-dark: #2c3e50;
+            --text-light: #6c757d;
+            --shadow-light: 0 2px 10px rgba(220, 53, 69, 0.1);
+            --shadow-medium: 0 4px 20px rgba(220, 53, 69, 0.15);
+            --shadow-strong: 0 8px 30px rgba(220, 53, 69, 0.2);
+            --gradient-red: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            --gradient-gold: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #ffffff 50%, var(--primary-red-light) 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .banner {
+            width: 100%;
+            height: 200px;
+            background-image: url('https://res.cloudinary.com/dmzkvdtj3/image/upload/v1756346216/fun-walk-hd_ey8rki.jpg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .header-info {
+            text-align: right;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            background: var(--white);
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-red);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+            padding-bottom: 20px;
+        }
+
+        .panel {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            /* padding: 30px; */
+            box-shadow: var(--shadow-medium);
+            transition: var(--transition);
+            border: 1px solid rgba(220, 53, 69, 0.1);
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-strong);
+        }
+
+        .main-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 300px;
+        }
+
+        .results-panel {
+            flex: 1;
+            min-width: 320px;
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #lottery-display {
+            font-size: 17.6rem;
+            font-weight: 900;
+            margin: 40px 0;
+            margin-top: 0 !important;
+            padding: 40px 20px;
+            background: var(--gradient-red);
+            color: var(--white);
+            min-width: 400px;
+            text-align: center;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-strong);
+            letter-spacing: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #lottery-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        #lottery-display.animate::before {
+            left: 100%;
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        button {
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 14px 28px;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.3s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        #draw-button {
+            background: var(--gradient-red);
+            color: var(--white);
+            box-shadow: var(--shadow-medium);
+            min-width: 200px;
+        }
+
+        #draw-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-strong);
+        }
+
+        #draw-button:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        #export-excel {
+            background: var(--gradient-gold);
+            color: var(--text-dark);
+        }
+
+        #export-pdf {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: var(--white);
+        }
+
+        #reset-button {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: var(--white);
+        }
+
+        #export-excel:hover, #export-pdf:hover, #reset-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .instructions {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--primary-red-light);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary-red);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--primary-red);
+            border-bottom: 3px solid var(--primary-red);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--gold);
+        }
+
+        #results-summary {
+            padding: 20px;
+            margin-bottom: 20px;
+            background: var(--gradient-red);
+            color: var(--white);
+            border-radius: var(--border-radius);
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-light);
+        }
+
+        #results-list {
+            list-style-type: none;
+            padding: 0;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        #results-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(220, 53, 69, 0.1);
+            transition: var(--transition);
+        }
+
+        #results-list li:hover {
+            background-color: var(--cream);
+        }
+
+        #results-list li:first-child {
+            background: var(--gradient-gold);
+            color: var(--text-dark);
+            font-weight: 600;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            border: none;
+        }
+
+        .result-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .strikethrough {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .cancel-btn {
+            background: var(--gradient-red);
+            color: var(--white);
+            font-size: 0.85rem;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        .cancel-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .cancel-btn:disabled {
+            background: var(--text-light);
+            transform: none;
+        }
+
+        /* Animation classes */
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            #lottery-display { 
+                font-size: 8rem; 
+                letter-spacing: 8px;
+                min-width: 350px;
+            }
+            .container { gap: 20px; }
+            .panel { padding: 20px; }
+            .button-group { flex-direction: column; align-items: center; }
+            button { min-width: 200px; }
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid var(--primary-red-light);
+            border-top: 4px solid var(--primary-red);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-info" style="background-color: #dc3545; color: white;">
+            Operator: <span id="operator-name"></span>
+        </div>
+        <div class="banner"></div>
+        <!-- <h1>🇮🇩 Fun Walk HUT ke-80 MPR RI 🇮🇩</h1>
+        <p class="subtitle">Sistem Undian Digital - Dirgahayu Indonesia</p> -->
+    </div>
+
+    <div class="container">
+        <div class="panel main-panel">
+            <div id="lottery-display" class="fade-in">0000</div>
+            <div class="controls">
+                <button id="draw-button" class="pulse">🎲 Mulai Undian</button>
+                <p class="instructions">
+                    <strong>📋 Instruksi:</strong><br>
+                    Tekan tombol "Mulai Undian" atau gunakan tombol Spasi / Enter pada keyboard untuk memulai pengundian
+                </p>
+            </div>
+        </div>
+        
+        <div class="panel results-panel">
+            <h2>🏆 Daftar Pemenang</h2>
+            <div id="results-summary">
+                <strong>Total Diundi:</strong> 0 |
+                <strong>Valid:</strong> 0 / 150 |
+                <strong>Dibatalkan:</strong> 0
+            </div>
+            <ul id="results-list"></ul>
+        </div>
+    </div>
+
+    <div class="button-group">
+        <div class="export-buttons">
+            <button id="export-excel">📊 Export Excel</button>
+            <button id="export-pdf">📄 Export PDF</button>
+        </div>
+        <button id="reset-button">🔄 Reset Data</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- KONFIGURASI ---
+            const CONFIG = {
+                MIN_NUMBER: 1,
+                MAX_NUMBER: 3000,
+                MAX_VALID_WINNERS: 150, // MODIFIED: Batas jumlah pemenang valid
+                ANIMATION_DURATION: 2000,
+                STORAGE_KEY: 'lotteryAppState_MPR80_v2' // Changed key to avoid conflict with old version
+            };
+
+            // --- ELEMEN DOM ---
+            const display = document.getElementById('lottery-display');
+            const drawButton = document.getElementById('draw-button');
+            const exportExcelButton = document.getElementById('export-excel');
+            const exportPdfButton = document.getElementById('export-pdf');
+            const resetButton = document.getElementById('reset-button');
+            const resultsList = document.getElementById('results-list');
+            const operatorNameDisplay = document.getElementById('operator-name');
+            const resultsSummary = document.getElementById('results-summary');
+
+            // --- STATE APLIKASI ---
+            let state = {
+                operatorName: '',
+                drawnNumbers: new Set(),
+                results: [],
+                isDrawing: false,
+            };
+            
+            let availableNumbers = [];
+
+            // --- FUNGSI INTI ---
+            
+            // Advanced Random Number Generator dengan multiple entropy sources
+            class SecureRandom {
+                constructor() {
+                    this.seed = this.generateSeed();
+                    this.state = this.seed;
+                }
+
+                generateSeed() {
+                    const now = Date.now();
+                    const perfNow = performance.now();
+                    const random = Math.random();
+                    const userAgent = navigator.userAgent.length;
+                    const screenInfo = screen.width * screen.height;
+                    const timezone = new Date().getTimezoneOffset();
+                    const mouseEntropy = window.mouseX || Math.random() * 1000;
+                    const mouseEntropyY = window.mouseY || Math.random() * 1000;
+                    let seed = (now * perfNow * random * userAgent * screenInfo * timezone * mouseEntropy * mouseEntropyY) % 2147483647;
+                    if (seed <= 0) seed += 2147483646;
+                    return Math.floor(seed);
+                }
+
+                next() {
+                    this.state = (this.state * 1664525 + 1013904223) % 4294967296;
+                    return this.state / 4294967296;
+                }
+
+                nextInt(min, max) {
+                    return Math.floor(this.next() * (max - min + 1)) + min;
+                }
+
+                reseed() {
+                    this.seed = this.generateSeed();
+                    this.state = this.seed;
+                }
+            }
+
+            const secureRandom = new SecureRandom();
+
+            let mouseEntropyCounter = 0;
+            window.addEventListener('mousemove', (e) => {
+                window.mouseX = e.clientX + mouseEntropyCounter;
+                window.mouseY = e.clientY + mouseEntropyCounter;
+                mouseEntropyCounter = (mouseEntropyCounter + 1) % 1000;
+                
+                if (mouseEntropyCounter % 100 === 0) {
+                    secureRandom.reseed();
+                }
+            });
+            
+            const initializeAvailableNumbers = () => {
+                availableNumbers = [];
+                for (let i = CONFIG.MIN_NUMBER; i <= CONFIG.MAX_NUMBER; i++) {
+                    if (!state.drawnNumbers.has(i)) {
+                        availableNumbers.push(i);
+                    }
+                }
+            };
+
+            const simpleHash = (str) => {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash |= 0;
+                }
+                return hash.toString();
+            };
+
+            const saveState = () => {
+                try {
+                    const dataToStore = JSON.stringify({
+                        results: state.results,
+                        operatorName: state.operatorName
+                    });
+                    const encodedData = btoa(dataToStore);
+                    const dataHash = simpleHash(encodedData);
+                    const payload = JSON.stringify({ data: encodedData, hash: dataHash });
+                    localStorage.setItem(CONFIG.STORAGE_KEY, payload);
+                } catch (e) {
+                    console.error("Gagal menyimpan state:", e);
+                    alert("Terjadi kesalahan saat menyimpan data.");
+                }
+            };
+
+            const loadState = () => {
+                const savedPayload = localStorage.getItem(CONFIG.STORAGE_KEY);
+                if (!savedPayload) {
+                    while(!state.operatorName) {
+                        state.operatorName = prompt("🎯 Silakan masukkan nama Anda sebagai operator:");
+                        if (!state.operatorName) alert("⚠️ Nama operator wajib diisi.");
+                    }
+                    operatorNameDisplay.textContent = state.operatorName;
+                    return;
+                }
+
+                try {
+                    const payload = JSON.parse(savedPayload);
+                    const { data, hash } = payload;
+
+                    if (simpleHash(data) !== hash) {
+                        alert("⚠️ Peringatan: Integritas data undian diragukan. Memulai sesi baru.");
+                        localStorage.removeItem(CONFIG.STORAGE_KEY);
+                        loadState();
+                        return;
+                    }
+
+                    const decodedData = atob(data);
+                    const parsedData = JSON.parse(decodedData);
+                    state.results = parsedData.results || [];
+                    state.operatorName = parsedData.operatorName || 'Tidak Diketahui';
+                    state.drawnNumbers = new Set(state.results.map(r => r.number));
+                    operatorNameDisplay.textContent = state.operatorName;
+
+                } catch (e) {
+                    console.error("Gagal memuat state:", e);
+                    alert("❌ Gagal memuat data undian sebelumnya. Memulai sesi baru.");
+                    localStorage.removeItem(CONFIG.STORAGE_KEY);
+                }
+            };
+
+            const updateSummary = () => {
+                const total = state.results.length;
+                const valid = state.results.filter(r => r.status === 'valid').length;
+                const cancelled = total - valid;
+
+                resultsSummary.innerHTML = `
+                    <strong>Total Diundi:</strong> ${total} |
+                    <strong>Valid:</strong> ${valid} / ${CONFIG.MAX_VALID_WINNERS} |
+                    <strong>Dibatalkan:</strong> ${cancelled}
+                `;
+                
+                // MODIFIED: Check if the valid winner limit is reached
+                if (valid >= CONFIG.MAX_VALID_WINNERS) {
+                    drawButton.disabled = true;
+                    drawButton.innerHTML = `🏁 ${CONFIG.MAX_VALID_WINNERS} Pemenang Terpilih`;
+                    drawButton.classList.remove('pulse');
+                } else if (!state.isDrawing) {
+                    drawButton.disabled = false;
+                    drawButton.innerHTML = '🎲 Mulai Undian';
+                }
+            };
+
+            const renderResults = () => {
+                resultsList.innerHTML = '';
+
+                for (let index = state.results.length - 1; index >= 0; index--) {
+                    const result = state.results[index];
+                    const li = document.createElement('li');
+                    li.classList.add('fade-in');
+
+                    const numberSpan = document.createElement('span');
+                    numberSpan.className = 'result-number';
+                    numberSpan.textContent = formatNumber(result.number);
+                    if (result.status === 'cancelled') {
+                        numberSpan.classList.add('strikethrough');
+                    }
+                    li.appendChild(numberSpan);
+
+                    if (index === state.results.length - 1) {
+                        const cancelButton = document.createElement('button');
+                        cancelButton.className = 'cancel-btn';
+                        cancelButton.innerHTML = '❌ Batalkan';
+                        cancelButton.onclick = () => handleCancel(index);
+
+                        if (result.status === 'cancelled') {
+                            cancelButton.disabled = true;
+                            cancelButton.innerHTML = '✅ Dibatalkan';
+                        }
+
+                        li.appendChild(cancelButton);
+                    }
+
+                    resultsList.appendChild(li);
+                }
+
+                updateSummary();
+                resultsList.scrollTop = 0;
+            };
+
+            const formatNumber = (num) => String(num).padStart(4, '0');
+
+            const handleCancel = (index) => {
+                const numberToCancel = formatNumber(state.results[index].number);
+                if (confirm(`⚠️ Anda yakin ingin membatalkan nomor undian ${numberToCancel}?`)) {
+                    state.results[index].status = 'cancelled';
+                    
+                    // MODIFIED: Do not re-add the number to the available pool, it remains drawn.
+                    // This prevents a cancelled number from being drawn again.
+                    
+                    saveState();
+                    renderResults();
+                }
+            };
+            
+            // MODIFIED: Simplified and more random number generation
+            const generateUniqueNumber = () => {
+                if (availableNumbers.length === 0) {
+                    alert('⚠️ Semua nomor undian yang tersedia telah diundi!');
+                    return null;
+                }
+                
+                secureRandom.reseed();
+                
+                const randomIndex = secureRandom.nextInt(0, availableNumbers.length - 1);
+                const selectedNumber = availableNumbers[randomIndex];
+                
+                // Remove the selected number from the available pool
+                availableNumbers.splice(randomIndex, 1);
+                
+                return selectedNumber;
+            };
+
+            const startDraw = () => {
+                const validWinners = state.results.filter(r => r.status === 'valid').length;
+                if (validWinners >= CONFIG.MAX_VALID_WINNERS) {
+                    alert(`🏁 Undian telah selesai. ${CONFIG.MAX_VALID_WINNERS} pemenang valid telah terpilih.`);
+                    return;
+                }
+                
+                if (state.isDrawing) return;
+
+                if (availableNumbers.length === 0) {
+                    alert("🎉 Semua nomor undian telah diundi!");
+                    return;
+                }
+
+                state.isDrawing = true;
+                drawButton.disabled = true;
+                drawButton.innerHTML = '⏳ Mengundi...';
+                drawButton.classList.remove('pulse');
+                
+                display.classList.add('animate');
+
+                const animationInterval = setInterval(() => {
+                    const randomNum = secureRandom.nextInt(CONFIG.MIN_NUMBER, CONFIG.MAX_NUMBER);
+                    display.textContent = formatNumber(randomNum);
+                }, 50);
+
+                setTimeout(() => {
+                    clearInterval(animationInterval);
+
+                    const finalNumber = generateUniqueNumber();
+                    if (finalNumber === null) {
+                        state.isDrawing = false;
+                        drawButton.disabled = false;
+                        drawButton.innerHTML = '🎲 Mulai Undian';
+                        drawButton.classList.add('pulse');
+                        display.textContent = "ERROR";
+                        display.classList.remove('animate');
+                        return;
+                    }
+
+                    display.textContent = formatNumber(finalNumber);
+                    state.drawnNumbers.add(finalNumber);
+                    state.results.push({ 
+                        number: finalNumber, 
+                        status: 'valid',
+                        timestamp: new Date().toLocaleString('id-ID')
+                    });
+
+                    saveState();
+                    renderResults();
+
+                    state.isDrawing = false;
+                    
+                    // updateSummary will handle the button state
+                    updateSummary();
+                    
+                    if(!drawButton.disabled){
+                       drawButton.classList.add('pulse');
+                    }
+
+                    display.classList.remove('animate');
+
+                    // Celebration effect
+                    display.classList.add('pulse');
+                    setTimeout(() => display.classList.remove('pulse'), 1000);
+
+                }, CONFIG.ANIMATION_DURATION);
+            };
+
+            const exportToExcel = () => {
+                if (state.results.length === 0) {
+                    alert("⚠️ Tidak ada data untuk diekspor.");
+                    return;
+                }
+
+                const workbook = XLSX.utils.book_new();
+                const worksheetData = [['No', 'Nomor Undian', 'Status', 'Waktu Undian', 'Operator']];
+
+                const sortedResults = [...state.results];
+                sortedResults.forEach((result, index) => {
+                    const statusText = result.status === 'valid' ? 'Valid' : 'Dibatalkan';
+                    worksheetData.push([
+                        index + 1,
+                        formatNumber(result.number),
+                        statusText,
+                        result.timestamp || 'Tidak tercatat',
+                        state.operatorName
+                    ]);
+                });
+
+                const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+                
+                const headerStyle = {
+                    fill: { fgColor: { rgb: "DC3545" } },
+                    font: { bold: true, color: { rgb: "FFFFFF" } }
+                };
+
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Hasil Undian');
+                
+                const fileName = `Hasil_Undian_Fun_Walk_HUT_80_MPR_${new Date().getTime()}.xlsx`;
+                XLSX.writeFile(workbook, fileName);
+            };
+
+            const exportToPDF = () => {
+                if (state.results.length === 0) {
+                    alert("⚠️ Tidak ada data untuk diekspor.");
+                    return;
+                }
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.setFontSize(18);
+                doc.setTextColor(220, 53, 69);
+                doc.text('Fun Walk HUT ke-80 MPR RI', 105, 20, { align: 'center' });
+                
+                doc.setFontSize(14);
+                doc.setTextColor(0, 0, 0);
+                doc.text('Hasil Undian Digital', 105, 30, { align: 'center' });
+
+                doc.setFontSize(10);
+                doc.text(`Operator: ${state.operatorName}`, 20, 45);
+                doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 20, 52);
+                doc.text(`Waktu: ${new Date().toLocaleTimeString('id-ID')}`, 20, 59);
+
+                const total = state.results.length;
+                const valid = state.results.filter(r => r.status === 'valid').length;
+                const cancelled = total - valid;
+
+                doc.text(`Total Diundi: ${total} | Valid: ${valid} | Dibatalkan: ${cancelled}`, 20, 70);
+
+                doc.setFontSize(9);
+                doc.setFillColor(220, 53, 69);
+                doc.rect(20, 80, 170, 8, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.text('No', 25, 86);
+                doc.text('Nomor Undian', 50, 86);
+                doc.text('Status', 90, 86);
+                doc.text('Waktu Undian', 120, 86);
+
+                doc.setTextColor(0, 0, 0);
+                let yPos = 95;
+                const sortedResults = [...state.results];
+                
+                sortedResults.forEach((result, index) => {
+                    if (yPos > 280) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+
+                    const statusText = result.status === 'valid' ? 'Valid' : 'Dibatalkan';
+                    
+                    doc.text((index + 1).toString(), 25, yPos);
+                    doc.text(formatNumber(result.number), 50, yPos);
+                    doc.text(statusText, 90, yPos);
+                    doc.text(result.timestamp || 'Tidak tercatat', 120, yPos);
+                    
+                    yPos += 7;
+                });
+
+                doc.setFontSize(8);
+                doc.setTextColor(128, 128, 128);
+                doc.text('Dokumen ini dibuat secara otomatis oleh Sistem Undian Digital MPR RI', 105, 290, { align: 'center' });
+
+                const fileName = `Hasil_Undian_Fun_Walk_HUT_80_MPR_${new Date().getTime()}.pdf`;
+                doc.save(fileName);
+            };
+
+            const resetData = () => {
+                if (state.results.length === 0) {
+                    alert("⚠️ Tidak ada data untuk direset.");
+                    return;
+                }
+
+                if (confirm("⚠️ PERINGATAN: Apakah Anda yakin ingin menghapus semua data undian? Tindakan ini tidak dapat dibatalkan!")) {
+                    if (confirm("🔄 Konfirmasi terakhir: Semua data akan hilang permanen. Lanjutkan?")) {
+                        state.results = [];
+                        state.drawnNumbers = new Set();
+                        display.textContent = "0000";
+                        
+                        localStorage.removeItem(CONFIG.STORAGE_KEY);
+                        
+                        // Re-prompt for operator name if not available
+                        if (!state.operatorName) {
+                            while(!state.operatorName) {
+                                state.operatorName = prompt("🎯 Silakan masukkan nama Anda sebagai operator:");
+                                if (!state.operatorName) alert("⚠️ Nama operator wajib diisi.");
+                            }
+                        }
+                        operatorNameDisplay.textContent = state.operatorName;
+                        saveState(); // Save the cleared state with operator name
+
+                        initializeAvailableNumbers();
+                        renderResults();
+                        
+                        alert("✅ Data berhasil direset!");
+                    }
+                }
+            };
+
+            // --- EVENT LISTENERS ---
+            drawButton.addEventListener('click', startDraw);
+            exportExcelButton.addEventListener('click', exportToExcel);
+            exportPdfButton.addEventListener('click', exportToPDF);
+            resetButton.addEventListener('click', resetData);
+            
+            window.addEventListener('keydown', (e) => {
+                const validWinners = state.results.filter(r => r.status === 'valid').length;
+                if ((e.code === 'Space' || e.key === 'Enter') && !state.isDrawing && validWinners < CONFIG.MAX_VALID_WINNERS) {
+                    e.preventDefault();
+                    startDraw();
+                }
+            });
+
+            // --- INISIALISASI ---
+            loadState();
+            initializeAvailableNumbers();
+            renderResults();
+        });
+    </script>
+</body>
+</html>
